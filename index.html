@@ -62,10 +62,8 @@
 
       const req = new XMLHttpRequest();
       req.open('get', "names.csv", true);
-      req.open('get', 'http://www.nsgd.co.jp/nsd/NSDGoods/mswin_tl/Kojiky5/CsvSample1.csv', true);
       req.send(null);
       req.onload() = function() {
-        //var r1 = "1,11,1\n2,2,2\n3,3,3"
         var r1 = req.responseText;
         var r2 = r1.split("\n");
         for(var i=0;i<r2.length;i++) {
