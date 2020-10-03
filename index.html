@@ -63,7 +63,7 @@
       const req = new XMLHttpRequest();
       req.open('get', "names.csv", true);
       req.send(null);
-      req.onload() = function() {
+      req.onload = function() {
         var r1 = req.responseText;
         var r2 = r1.split("\n");
         for(var i=0;i<r2.length;i++) {
@@ -103,7 +103,7 @@
         while(tb2.rows.length > 0) tb2.deleteRow(-1);
         req.open('get', "problems/"+name+".csv")
         req.send(null);
-        req.onload() = function() {
+        req.onload = function() {
           //var data = "4,5\n0,1,0,1,1\n0,1,1,1,0\n1,1,1,1,0\n0,1,1,0,0"
           var data = req.responseText;
           var r2 = data.split("\n");
