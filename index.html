@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Dice game</title>
+    <meta name="description" content="競技サイコロ切り取り">
+    <meta name="keywords" content="競技,サイコロ">
+    <style>
+      h1 {
+        color: black; text-align:center;
+        border-top: solid 1px black;
+        border-bottom: solid 1px black;
+        padding: 20px;
+        margin: auto;
+      }
+      #tb{border-collapse: collapse; }
+      #tb th {padding: 20px; border: solid 2px black;}
+      #tb td {padding: 20px; border: solid 1px black;}
+      #tb2{border-collapse: collapse; }
+      #tb2 td {background: #F9F9F9; padding: 20px; border: solid 0.5px black;}
+      #tb3 th {padding: 20px;}
+      button {
+        /*text-decoration: none;*/
+        padding: 10px 20px;
+        border: solid 1px black;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>競技サイコロ（仮）</h1>
+    <h2>ルール</h2>
+    <p>与えられたマス目をいくつかの色で塗り分けてください。<br>
+    そのとき、色が違うすべての連結成分について、それらがサイコロの展開図になるようにしてください。<br></p>
+    <p>現バージョンでは、ステージをクリアしたという情報は一切保存されません。</p>
+    <h2>問題一覧</h2>
+    <table id=tb>
+      <tr><th>名前</th><th>難易度</th><th>追加日時</th></tr>
+    </table>
+
+    <h2>ゲーム画面</h2>
+    <p id=puzzle_id></p>
+    <table id=tb2>
+      <td><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></td>
+    </table>
+    <table id=tb3>
+      <td>
+        <th style=background:#F898A4; onclick="color_change(this)"></th>
+        <th style=background:#FCDA9C; onclick="color_change(this)"></th>
+        <th style=background:#F7FAA1; onclick="color_change(this)"></th>
+        <th style=background:#B4F6A4; onclick="color_change(this)"></th>
+        <th style=background:#9BE0F1; onclick="color_change(this)"></th>
+        <th style=background:#A2ACEB; onclick="color_change(this)"></th>
+      </td>
+    </table>
+
+    <button type="button" onclick="check()">提出</button>
+    <p id=result></p>
+    
+    <script>
+      var tb = document.getElementById("tb");
+      var tb2 = document.getElementById("tb2");
+
+      const req = new XMLHttpRequest();
+      req.open('get', "names.csv", true);
+      req.open('get', 'http://www.nsgd.co.jp/nsd/NSDGoods/mswin_tl/Kojiky5/CsvSample1.csv', true);
+      req.send(null);
+      req.onload() = function() {
+        //var r1 = "1,11,1\n2,2,2\n3,3,3"
+        var r1 = req.responseText;
+        var r2 = r1.split("\n");
+        for(var i=0;i<r2.length;i++) {
+          var row = tb.insertRow(-1);
+          var idd = 0;
+          var r3 = r2[i].split(",");
+          for(var j=0;j<r3.length;j++) {
+            var cell = row.insertCell();
+            if (idd == 0) {
+              cell.innerHTML = "<a href=\"javascript: game("+(i+1)+");\">"+r2[i][j]+"</a>";
+            } else {
+              cell.innerHTML = r3[j];
+            }
+            idd++;
+          }
+        }
+      }
+
+      var mycolor = "#000000"
+      var click = false;
+      var datas;
+
+      document.onmousedown = function() {
+        click = true;
+      }
+
+      document.onmouseup = function() {
+        click = false;
+      }
+
+      var place, h, w;
+
+      function game(name) {
+        puzzle_id.innerText = name
+        result.innerText = ""
+        const req = new XMLHttpRequest();
+        while(tb2.rows.length > 0) tb2.deleteRow(-1);
+        req.open('get', "problems/"+name+".csv")
+        req.send(null);
+        req.onload() = function() {
+          //var data = "4,5\n0,1,0,1,1\n0,1,1,1,0\n1,1,1,1,0\n0,1,1,0,0"
+          var data = req.responseText;
+          var r2 = data.split("\n");
+          var r0 = r2[0].split(",");
+
+          h = r0[0]; w = r0[1];
+
+          place = new Array(h);
+          for(var i=0;i<h;i++) {
+            place[i] = new Array(w).fill(0);
+          }
+          for(var i=0;i<h;i++) {
+            var row = tb2.insertRow(-1);
+            var r3 = r2[i+1].split(",");
+            for(var j=0;j<w;j++) {
+              var cell = row.insertCell();
+              if (r3[j] == "1") {
+                cell.onmousedown = function() {click = true; this.style.background = mycolor}
+                cell.onmouseover = function() {
+                  if (click) this.style.background = mycolor
+                }
+                cell.onmouseup = function() {click = false;}
+                // cell.onclick = doo(cell);
+                // cell.hober = doo2(cell);
+                place[i][j] = 1;
+              } else {
+                cell.style.background = "#FFFFFF"
+                cell.style.border = "0px none"
+              }
+            }
+          }
+        }
+      }
+
+      function color_change(e) {
+        mycolor = e.style.background;
+      }
+
+      var ds34 = [[[0,1,0,0],[1,1,1,0],[0,0,1,1]],[[0,1,0,0],[1,1,1,1],[0,1,0,0]],[[0,0,1,0],[1,1,1,1],[0,0,1,0]],[[0,1,0,0],[0,1,1,1],[1,1,0,0]],[[1,0,0,0],[1,1,1,1],[1,0,0,0]],[[0,0,1,1],[1,1,1,0],[0,0,1,0]],[[0,0,0,1],[1,1,1,1],[0,0,0,1]],[[0,1,0,0],[1,1,1,1],[0,0,0,1]],[[1,1,0,0],[0,1,1,1],[0,0,0,1]],[[0,0,1,0],[1,1,1,0],[0,0,1,1]],[[0,0,1,0],[1,1,1,1],[1,0,0,0]],[[0,0,1,1],[1,1,1,0],[0,1,0,0]],[[0,0,0,1],[1,1,1,1],[0,1,0,0]],[[0,0,1,1],[0,1,1,0],[1,1,0,0]],[[1,1,0,0],[0,1,1,0],[0,0,1,1]],[[1,0,0,0],[1,1,1,1],[0,0,1,0]],[[1,1,0,0],[0,1,1,1],[0,1,0,0]],[[1,0,0,0],[1,1,1,1],[0,0,0,1]],[[0,0,0,1],[0,1,1,1],[1,1,0,0]],[[0,1,0,0],[1,1,1,1],[1,0,0,0]],[[0,0,0,1],[1,1,1,1],[0,0,1,0]],[[0,0,1,1],[1,1,1,0],[1,0,0,0]],[[1,0,0,0],[1,1,1,1],[0,1,0,0]],[[1,1,0,0],[0,1,1,1],[0,0,1,0]],[[0,1,0,0],[1,1,1,1],[0,0,1,0]],[[0,0,1,0],[1,1,1,1],[0,1,0,0]],[[0,0,1,0],[0,1,1,1],[1,1,0,0]],[[1,0,0,0],[1,1,1,0],[0,0,1,1]],[[0,0,0,1],[1,1,1,1],[1,0,0,0]],[[0,0,1,0],[1,1,1,1],[0,0,0,1]]];
+      //var ds34 = [[[0,1,0,0],[1,1,1,1],[1,0,0,0]]]
+      var ds43 = [[[0,0,1],[0,1,1],[1,1,0],[0,1,0]],[[0,1,0],[0,1,0],[1,1,1],[0,1,0]],[[0,1,0],[1,1,1],[0,1,0],[0,1,0]],[[0,1,0],[0,1,0],[1,1,1],[0,0,1]],[[0,1,0],[0,1,0],[0,1,0],[1,1,1]],[[1,0,0],[1,1,1],[0,1,0],[0,1,0]],[[1,1,1],[0,1,0],[0,1,0],[0,1,0]],[[0,1,1],[0,1,0],[1,1,0],[0,1,0]],[[0,1,1],[0,1,0],[1,1,0],[1,0,0]],[[0,0,1],[1,1,1],[0,1,0],[0,1,0]],[[0,1,0],[1,1,0],[0,1,0],[0,1,1]],[[1,0,0],[1,1,0],[0,1,1],[0,1,0]],[[1,1,0],[0,1,0],[0,1,1],[0,1,0]],[[1,0,0],[1,1,0],[0,1,1],[0,0,1]],[[0,0,1],[0,1,1],[1,1,0],[1,0,0]],[[0,1,0],[0,1,1],[0,1,0],[1,1,0]],[[0,1,0],[0,1,0],[1,1,1],[1,0,0]],[[0,1,1],[0,1,0],[0,1,0],[1,1,0]],[[1,1,0],[0,1,0],[0,1,1],[0,0,1]],[[0,1,0],[0,1,0],[1,1,0],[0,1,1]],[[1,1,0],[0,1,1],[0,1,0],[0,1,0]],[[1,0,0],[1,1,0],[0,1,0],[0,1,1]],[[0,1,0],[0,1,0],[0,1,1],[1,1,0]],[[0,1,0],[0,1,1],[1,1,0],[1,0,0]],[[0,1,0],[0,1,1],[1,1,0],[0,1,0]],[[0,1,0],[1,1,0],[0,1,1],[0,1,0]],[[0,1,0],[1,1,0],[0,1,1],[0,0,1]],[[0,0,1],[0,1,1],[0,1,0],[1,1,0]],[[1,1,0],[0,1,0],[0,1,0],[0,1,1]],[[0,1,1],[1,1,0],[0,1,0],[0,1,0]]]
+      var ds25 = [[[1,1,1,0,0],[0,0,1,1,1]],[[0,0,1,1,1],[1,1,1,0,0]]]
+      var ds52 = [[[1,0],[1,0],[1,1],[0,1],[0,1]],[[0,1],[0,1],[1,1],[1,0],[1,1]]]
+
+      function _check(f,g,ds) {
+        ds.forEach(cc => {
+          for(var i=0;i<h-f+1;i++) {
+            for(var j=0;j<w-g+1;j++) {
+              var ok = true, color = "";
+              for(var k=0;k<f;k++) {
+                for(var l=0;l<g;l++) {
+                  if (cc[k][l] == 1) {
+                    if (place[i+k][j+l] != 1) ok = false;
+                    else {
+                      var cr = tb2.rows[i+k].cells[j+l].style.background;
+                      if (color == "") color = cr;
+                      else if (color != cr) ok = false;
+                    }
+                  }
+                }
+              }
+              if (ok) {
+                for(var k=0;k<f;k++) {
+                  for(var l=0;l<g;l++) {
+                    if (cc[k][l] == 1) place[i+k][j+l] = 2;
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      function check() {
+        _check(3,4,ds34); _check(4,3,ds43); _check(2,5,ds25); _check(5,2,ds52);
+
+        var an = 0;
+
+        for(var i=0;i<h;i++) {
+          for(var j=0;j<w;j++) {
+            if (place[i][j] == 1) an+=1;
+            if (place[i][j] == 2) place[i][j] = 1;
+          }
+        }
+
+        if (an == 0) {
+          result.innerText = "正解おめでとう！"
+          var idx = Number(puzzle_id.innerText);
+          tb.rows[idx].style.background = "#FFA500";
+        }
+      }
+    </script>
+  </body>
+</html>
