@@ -141,6 +141,15 @@
       document.onmouseup = function() {
         click = false;
       }
+      
+      // スマホ用
+      document.ontouchstart = function() {
+        click = true;
+      }
+      
+      document.ontouchend = function() {
+        click = false;
+      }
 
       var place, h, w;
       var id_now;
@@ -177,6 +186,9 @@
                   if (click) this.style.background = mycolor
                 }
                 cell.onmouseup = function() {click = false;}
+                document.ontouchstart = function() {click = true; this.style.background = mycolor}
+                document.ontouchmove = function() {this.style.background = mycolor}
+                document.ontouchend = function() {click = false;}
                 cell.style.background = "#F9F9F9"
                 place[i][j] = 1;
               } else {
