@@ -153,8 +153,6 @@
         req.send(null);
         req.onload = function() {
           var data = req.responseText;
-          // 文字列の比較がうまくいかないため、空白を除去
-          data = data.trim()
           var r2 = data.split("\n");
           var r0 = r2[0].split(",");
 
@@ -166,8 +164,10 @@
           }
           for(var i=0;i<h;i++) {
             var row = tb2.insertRow(-1);
+            // 空白があると文字列の比較がうまくいかないため、空白を除去
             var r3 = r2[i+1].split(",");
             for(var j=0;j<w;j++) {
+              r3[j] = r3[j].trim()
               var cell = row.insertCell();
               if (r3[j] == "1") {
                 cell.onmousedown = function() {click = true; this.style.background = mycolor}
