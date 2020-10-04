@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>賽強</title>
+    <title>賽強（仮）</title>
     <meta name="description" content="賽強">
     <meta name="keywords" content="サイコロ,展開図">
     <style>
@@ -227,20 +227,55 @@
           }
         });
       }
+      // 連結成分の計算の際、上下左右に進むための配列が必要となる
+      var up = [0,0,1,-1];
+      var lf = [1,-1,0,0];
 
       function check() {
-        _check(3,4,ds34); _check(4,3,ds43); _check(2,5,ds25); _check(5,2,ds52);
 
-        var an = 0;
+        // この状態が展開図であるか検査
+        // ・全部が6マスの連結成分であるか？
+        // ・サイコロの展開図を同色連結部分に重ねていくと、全てのマスが埋まるか？
 
+        var ok = true;
+        var used = new Array(h);
+        for(var i=0;i<h;i++) {
+          used[i] = new Array(w).fill(0);
+        }
         for(var i=0;i<h;i++) {
           for(var j=0;j<w;j++) {
-            if (place[i][j] == 1) an+=1;
-            if (place[i][j] == 2) place[i][j] = 1;
+            if (used[i][j]) continue;
+            if (place[i][j] == 0) continue
+            var val = 0;
+            var stack = [[i,j]]
+            var color = tb2.rows[i].cells[j].style.background;
+            while(stack.length > 0) {
+              var now = stack[stack.length - 1];
+              stack.pop();
+
+              for(var k=0;k<4;k++) {
+                var nx = now[0] + up[k];
+                var ny = now[1] + lf[k];
+                if (0 <= nx && nx < h && 0 <= ny && ny < w && place[nx][ny] && !used[nx][ny]) {
+                  var color2 = tb2.rows[nx].cells[ny].style.background;
+                  if (color == color2) {
+                    val++;
+                    stack.push([nx,ny])
+                    used[nx][ny] = true
+                  }
+                }
+              }
+            }
+            if (val != 0 && val != 6) ok = false;
           }
         }
+        if (!ok) {
+          return;
+        }
 
-        if (an == 0) {
+        _check(3,4,ds34); _check(4,3,ds43); _check(2,5,ds25); _check(5,2,ds52);
+
+        if (ok) {
           result.innerText = "正解！"
           var idx = Number(id_now);
           if (tb.rows[idx].style.background != "#E6FF80") {
