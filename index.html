@@ -153,8 +153,8 @@
         req.send(null);
         req.onload = function() {
           var data = req.responseText;
-          // 空白が交じると文字列の比較がうまくいかないため、除去
-          data = data.replace(" ","")
+          // 文字列の比較がうまくいかないため、空白を除去
+          data = data.trim()
           var r2 = data.split("\n");
           var r0 = r2[0].split(",");
 
